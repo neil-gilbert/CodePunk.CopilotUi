@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:CodePunk.CopilotDesktop.UI.Converters"
+        xmlns:ui="clr-namespace:CodePunk.CopilotDesktop.UI"
+        x:Class="CodePunk.CopilotDesktop.UI.MainWindow"
+        Width="900" Height="600"
+        Title="CodePunk Copilot Desktop"
+        mc:Ignorable="d">
+  <Window.Resources>
+    <conv:EqualsConverter x:Key="EqualsConverter" />
+  </Window.Resources>
+  <Design.DataContext>
+    <ui:MainWindowViewModel xmlns:ui="clr-namespace:CodePunk.CopilotDesktop.UI" />
+  </Design.DataContext>
+
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Background="#F3F3F3" Padding="12">
+      <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto">
+        <TextBlock Text="CodePunk Copilot Desktop" FontWeight="Bold" FontSize="16" />
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="💻 Code" VerticalAlignment="Center" />
+          <ToggleSwitch IsChecked="{Binding Chat.IsChatMode}"/>
+          <TextBlock Text="💬 Chat" VerticalAlignment="Center" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    <ScrollViewer Name="ChatScroll" VerticalScrollBarVisibility="Auto">
+      <ItemsControl ItemsSource="{Binding Chat.Messages}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="core:ChatMessage" xmlns:core="clr-namespace:CodePunk.CopilotDesktop.Core">
+            <Grid ColumnDefinitions="*,*" Margin="12,6">
+              <Border Grid.Column="0" Background="#EEE" Padding="10" CornerRadius="10" MaxWidth="600"
+                      IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=Assistant}">
+                <TextBlock TextWrapping="Wrap" Text="{Binding Content}"/>
+              </Border>
+
+              <Border Grid.Column="1" Background="#0078D4" Padding="10" CornerRadius="10" MaxWidth="600"
+                      IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=User}">
+                <TextBlock TextWrapping="Wrap" Text="{Binding Content}" Foreground="White"/>
+              </Border>
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+    <Border DockPanel.Dock="Bottom" Background="#F9F9F9" Padding="12">
+      <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="8" RowSpacing="8">
+        <TextBox Name="InputBox" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                 AcceptsReturn="True"
+                 Watermark="Ask Copilot..."
+                 Text="{Binding Chat.InputText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Copilot is typing..." IsVisible="{Binding Chat.IsStreaming}"/>
+        <Button Grid.Row="1" Grid.Column="1" Content="Send" Command="{Binding Chat.SendCommand}"/>
+      </Grid>
+    </Border>
+  </DockPanel>
+</Window>
