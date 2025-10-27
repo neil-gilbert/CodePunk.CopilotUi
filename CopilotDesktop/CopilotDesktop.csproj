@@ -15,6 +15,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Markdown.Avalonia" Version="11.1.0" />
   </ItemGroup>
 
   <ItemGroup>
