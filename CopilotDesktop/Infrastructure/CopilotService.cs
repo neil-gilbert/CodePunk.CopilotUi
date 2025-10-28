@@ -31,6 +31,7 @@ public sealed class CopilotService : ICopilotService
             : prompt;
 
         await _semaphore.WaitAsync();
+        Exception? error = null;
         try
         {
             await EnsureProcessAsync();
@@ -40,12 +41,12 @@ public sealed class CopilotService : ICopilotService
 
             await foreach (var line in _process.ReadOutputLinesAsync())
             {
-                if (!CopilotJsonParser.TryParse(line, out var chunk, out var isDone, out var error))
+                if (!CopilotJsonParser.TryParse(line, out var chunk, out var isDone, out var jsonError))
                     continue;
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(jsonError))
                 {
-                    yield return $"[error] {error}";
+                    _logger.LogWarning("Copilot reported error: {Error}", jsonError);
                 }
 
                 if (!string.IsNullOrEmpty(chunk))
@@ -63,11 +64,14 @@ public sealed class CopilotService : ICopilotService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Copilot process error");
-            yield return $"[error] {ex.Message}";
-            await ResetProcessAsync();
+            error = ex;
         }
         finally
         {
+            if (error != null)
+            {
+                await ResetProcessAsync();
+            }
             _semaphore.Release();
         }
     }

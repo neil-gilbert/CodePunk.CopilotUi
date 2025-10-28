@@ -5,6 +5,7 @@
         xmlns:conv="clr-namespace:CodePunk.CopilotDesktop.UI.Converters"
         xmlns:ui="clr-namespace:CodePunk.CopilotDesktop.UI"
         xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+        xmlns:core="clr-namespace:CodePunk.CopilotDesktop.Core"
         x:Class="CodePunk.CopilotDesktop.UI.MainWindow"
         Width="900" Height="600"
         Title="CodePunk Copilot Desktop"
@@ -30,7 +31,7 @@
     <ScrollViewer Name="ChatScroll" VerticalScrollBarVisibility="Auto">
       <ItemsControl ItemsSource="{Binding Chat.Messages}">
         <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="core:ChatMessage" xmlns:core="clr-namespace:CodePunk.CopilotDesktop.Core">
+          <DataTemplate x:DataType="core:ChatMessage">
             <Grid ColumnDefinitions="*,*" Margin="12,6">
               <Border Grid.Column="0" Background="#EEE" Padding="10" CornerRadius="10" MaxWidth="600"
                       IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=Assistant}">
