@@ -14,11 +14,11 @@ public class ModeSwitchingTests
     [Fact(DisplayName = "Given mode switches When sending Then behavior updates")]
     public async Task Given_ModeSwitch_When_Sending_Then_UpdatesBehavior()
     {
-        var p1 = new FakeCopilotProcess(); p1.Enqueue("{\"delta\":\"a\"}", "{\"done\":true}");
-        var p2 = new FakeCopilotProcess(); p2.Enqueue("{\"delta\":\"b\"}", "{\"done\":true}");
+        var p = new FakeCopilotProcess();
+        p.Enqueue("{\"delta\":\"a\"}", "{\"done\":true}");
+        p.Enqueue("{\"delta\":\"b\"}", "{\"done\":true}");
         var factory = new FakeCopilotProcessFactory();
-        factory.Enqueue(p1);
-        factory.Enqueue(p2);
+        factory.Enqueue(p);
 
         var svc = new CopilotService(new NullLogger<CopilotService>(), factory);
 
@@ -28,8 +28,8 @@ public class ModeSwitchingTests
         var res2 = new List<string>();
         await foreach (var line in svc.StreamResponseAsync("Second", ChatMode.Chat)) res2.Add(line);
 
-        p1.Prompts[0].Should().Be("First");
-        p2.Prompts[0].Should().StartWith("[system note:");
+        p.Prompts[0].Should().Be("First");
+        p.Prompts[1].Should().StartWith("[system note:");
         res1.Should().Equal("a");
         res2.Should().Equal("b");
     }
