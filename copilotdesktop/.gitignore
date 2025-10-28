@@ -17,3 +17,11 @@ TestResults/
 .DS_Store
 Thumbs.db
 
+Anthropic.SDK/
+CodePunk/
+CodePunk.Conveyancing/
+            
+CodePunk.Highlight/
+crush/
+gemini-cli/
+
