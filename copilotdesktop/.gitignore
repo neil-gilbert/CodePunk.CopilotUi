@@ -1,0 +1,27 @@
+# Build outputs
+bin/
+obj/
+
+# Test outputs
+TestResults/
+
+# IDE settings
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# OS files
+.DS_Store
+Thumbs.db
+
+Anthropic.SDK/
+CodePunk/
+CodePunk.Conveyancing/
+            
+CodePunk.Highlight/
+crush/
+gemini-cli/
+
