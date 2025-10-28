@@ -17,8 +17,5 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Markdown.Avalonia" Version="11.0.3-a1" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="UI/MainWindow.axaml" />
-    <AvaloniaResource Include="UI/MainWindow.axaml" />
-  </ItemGroup>
+  
 </Project>
