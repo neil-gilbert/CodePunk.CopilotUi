@@ -31,7 +31,6 @@ public sealed class CopilotService : ICopilotService
             : prompt;
 
         await _semaphore.WaitAsync();
-        Exception? error = null;
         try
         {
             await EnsureProcessAsync();
@@ -61,17 +60,8 @@ public sealed class CopilotService : ICopilotService
                 }
             }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Copilot process error");
-            error = ex;
-        }
         finally
         {
-            if (error != null)
-            {
-                await ResetProcessAsync();
-            }
             _semaphore.Release();
         }
     }
