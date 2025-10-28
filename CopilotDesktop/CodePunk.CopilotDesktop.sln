@@ -2,9 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopilotDesktop", "CopilotDesktop/CopilotDesktop.csproj", "{3B0D8E4A-2D66-4F0B-A4C1-7E0F4C8C8E4C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopilotDesktop", "src/CopilotDesktop/CopilotDesktop.csproj", "{3B0D8E4A-2D66-4F0B-A4C1-7E0F4C8C8E4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopilotDesktop.Tests", "Tests/CopilotDesktop.Tests/CopilotDesktop.Tests.csproj", "{B5B1F3B4-0A0B-4D66-8C4D-88C2E6C7B21D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopilotDesktop.Tests", "tests/CopilotDesktop.Tests/CopilotDesktop.Tests.csproj", "{B5B1F3B4-0A0B-4D66-8C4D-88C2E6C7B21D}"
 EndProject
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,4 +22,3 @@ Global
         {B5B1F3B4-0A0B-4D66-8C4D-88C2E6C7B21D}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 EndGlobal
-

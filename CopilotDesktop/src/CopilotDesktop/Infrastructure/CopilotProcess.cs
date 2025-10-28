@@ -142,3 +142,4 @@ public sealed class CopilotProcessFactory : ICopilotProcessFactory
 {
     public ICopilotProcess Create() => new CopilotProcess();
 }
+

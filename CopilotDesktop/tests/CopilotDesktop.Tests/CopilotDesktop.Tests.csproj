@@ -16,6 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../CopilotDesktop/CopilotDesktop.csproj" />
+    <ProjectReference Include="../../src/CopilotDesktop/CopilotDesktop.csproj" />
   </ItemGroup>
 </Project>

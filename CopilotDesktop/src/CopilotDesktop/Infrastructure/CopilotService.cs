@@ -95,3 +95,4 @@ public sealed class CopilotService : ICopilotService
         finally { _process = null; }
     }
 }
+

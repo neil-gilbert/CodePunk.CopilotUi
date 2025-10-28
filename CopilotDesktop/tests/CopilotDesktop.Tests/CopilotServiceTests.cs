@@ -52,3 +52,4 @@ public class CopilotServiceTests
         collected.Should().Equal(new[] { "Hello", " world" });
     }
 }
+

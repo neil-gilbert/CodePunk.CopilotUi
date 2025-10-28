@@ -27,3 +27,4 @@ public interface ICopilotProcess : IAsyncDisposable
     event EventHandler? Exited;
     bool IsRunning { get; }
 }
+

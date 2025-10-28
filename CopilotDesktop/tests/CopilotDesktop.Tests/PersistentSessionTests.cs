@@ -34,3 +34,4 @@ public class PersistentSessionTests
         second.Should().Equal("World");
     }
 }
+

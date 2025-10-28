@@ -57,3 +57,4 @@ public class ModeSwitchingTests
         res2.Should().Equal("second");
     }
 }
+

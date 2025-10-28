@@ -15,3 +15,4 @@ public interface ICopilotService
     /// <returns>Streaming sequence of response chunks.</returns>
     IAsyncEnumerable<string> StreamResponseAsync(string prompt, ChatMode mode);
 }
+

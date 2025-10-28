@@ -73,3 +73,4 @@ internal sealed class FakeCopilotProcessFactory : ICopilotProcessFactory
         return _queue.Dequeue();
     }
 }
+

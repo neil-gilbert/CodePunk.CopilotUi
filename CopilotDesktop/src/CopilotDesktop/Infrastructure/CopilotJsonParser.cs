@@ -28,9 +28,9 @@ internal static class CopilotJsonParser
                 error = errElem.ValueKind == JsonValueKind.String ? errElem.GetString() : errElem.ToString();
             }
             if (root.TryGetProperty("done", out var doneElem) && doneElem.ValueKind == JsonValueKind.True)
-            {
-                isDone = true;
-            }
+                {
+                    isDone = true;
+                }
             else if (root.TryGetProperty("type", out var typeElem) && typeElem.ValueKind == JsonValueKind.String)
             {
                 var t = typeElem.GetString();

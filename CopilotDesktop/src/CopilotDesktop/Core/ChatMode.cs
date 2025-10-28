@@ -8,3 +8,4 @@ public enum ChatMode
     Code = 0,
     Chat = 1
 }
+

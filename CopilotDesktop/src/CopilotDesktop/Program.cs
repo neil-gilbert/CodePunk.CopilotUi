@@ -42,3 +42,4 @@ internal static class Program
                 services.AddSingleton<UI.MainWindowViewModel>();
             });
 }
+
