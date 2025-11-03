@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ public class ChatViewModel : INotifyPropertyChanged
 
     public ObservableCollection<Core.ChatMessage> Messages { get; } = new();
 
+    public bool HasMessages => Messages.Count > 0;
+
     public string InputText
     {
         get => _inputText;
@@ -24,6 +27,7 @@ public class ChatViewModel : INotifyPropertyChanged
             if (_inputText != value)
             {
                 _inputText = value;
+                System.Diagnostics.Debug.WriteLine($"InputText changed to: '{_inputText}'");
                 OnPropertyChanged();
                 SendCommand.RaiseCanExecuteChanged();
             }
@@ -68,16 +72,32 @@ public class ChatViewModel : INotifyPropertyChanged
 
     public ChatViewModel(ICopilotService copilot)
     {
-        _copilot = copilot;
+        System.Diagnostics.Debug.WriteLine($"ChatViewModel created with copilot service: {copilot?.GetType().Name ?? "NULL"}");
+        _copilot = copilot ?? throw new ArgumentNullException(nameof(copilot));
         SendCommand = new AsyncRelayCommand(SendAsync, CanSend);
+        Messages.CollectionChanged += OnMessagesChanged;
+        System.Diagnostics.Debug.WriteLine("ChatViewModel constructor complete, SendCommand created");
     }
 
-    private bool CanSend() => !IsStreaming && !string.IsNullOrWhiteSpace(InputText);
+    private void OnMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        => OnPropertyChanged(nameof(HasMessages));
+
+    private bool CanSend()
+    {
+        var canSend = !IsStreaming && !string.IsNullOrWhiteSpace(InputText);
+        System.Diagnostics.Debug.WriteLine($"CanSend: {canSend}, IsStreaming: {IsStreaming}, InputText: '{InputText}'");
+        return canSend;
+    }
 
     private async Task SendAsync()
     {
+        System.Diagnostics.Debug.WriteLine($"SendAsync called! InputText: '{InputText}'");
         var prompt = InputText.Trim();
-        if (string.IsNullOrEmpty(prompt)) return;
+        if (string.IsNullOrEmpty(prompt))
+        {
+            System.Diagnostics.Debug.WriteLine("Prompt is empty after trimming, returning early");
+            return;
+        }
 
         InputText = string.Empty;
 
@@ -98,16 +118,23 @@ public class ChatViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            assistantMsg.Content += $"[error] {ex.Message}";
+            var errorMsg = ex.InnerException?.Message ?? ex.Message;
+            assistantMsg.Content += $"**Error:** {errorMsg}\n\n";
+            System.Diagnostics.Debug.WriteLine($"Error in SendAsync: {ex}");
         }
         finally
         {
             IsStreaming = false;
         }
     }
+    
+    public void ClearHistory()
+    {
+        Messages.Clear();
+        _copilot.ClearHistory();
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
-

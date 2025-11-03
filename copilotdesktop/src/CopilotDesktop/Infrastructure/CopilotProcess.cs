@@ -15,7 +15,7 @@ namespace CodePunk.CopilotDesktop.Infrastructure;
 public sealed class CopilotProcess : ICopilotProcess
 {
     private readonly string _fileName;
-    private readonly string _arguments;
+    private string _arguments;
     private Process? _process;
     private Channel<string>? _outputChannel;
     private CancellationTokenSource? _readCts;
@@ -23,10 +23,18 @@ public sealed class CopilotProcess : ICopilotProcess
     public event EventHandler? Exited;
     public bool IsRunning => _process is { HasExited: false };
 
-    public CopilotProcess(string fileName = "copilot", string arguments = "chat --json")
+    public CopilotProcess(string fileName = "copilot", string arguments = "")
     {
         _fileName = fileName;
         _arguments = arguments;
+    }
+    
+    public void SetPrompt(string prompt, bool useContinue = false)
+    {
+        // Escape the prompt for shell argument
+        var escapedPrompt = prompt.Replace("\"", "\\\"");
+        var continueFlag = useContinue ? "--continue " : "";
+        _arguments = $"{continueFlag}-p \"{escapedPrompt}\" --allow-all-tools";
     }
 
     /// <summary>
@@ -49,7 +57,7 @@ public sealed class CopilotProcess : ICopilotProcess
         {
             FileName = _fileName,
             Arguments = _arguments,
-            RedirectStandardInput = true,
+            RedirectStandardInput = false,  // Non-interactive mode doesn't use stdin
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -58,7 +66,17 @@ public sealed class CopilotProcess : ICopilotProcess
 
         _process = new Process { StartInfo = psi, EnableRaisingEvents = true };
         _process.Exited += (_, __) => Exited?.Invoke(this, EventArgs.Empty);
-        _process.Start();
+        
+        try
+        {
+            _process.Start();
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Failed to start '{_fileName}' process. Make sure GitHub Copilot CLI is installed. " +
+                $"Install it with: npm install -g @githubnext/github-copilot-cli", ex);
+        }
 
         _ = Task.Run(() => ReadLinesAsync(_process.StandardOutput, _readCts.Token));
         _ = Task.Run(() => ReadLinesAsync(_process.StandardError, _readCts.Token));

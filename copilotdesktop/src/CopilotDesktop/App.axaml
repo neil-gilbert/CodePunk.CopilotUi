@@ -4,5 +4,6 @@
              RequestedThemeVariant="Light">
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://CodePunk.CopilotDesktop/Styles/Theme.axaml" />
   </Application.Styles>
 </Application>

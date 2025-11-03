@@ -14,5 +14,10 @@ public interface ICopilotService
     /// <param name="mode">Interaction mode.</param>
     /// <returns>Streaming sequence of response chunks.</returns>
     IAsyncEnumerable<string> StreamResponseAsync(string prompt, ChatMode mode);
+    
+    /// <summary>
+    /// Clears the conversation history to start a new session.
+    /// </summary>
+    void ClearHistory();
 }
 

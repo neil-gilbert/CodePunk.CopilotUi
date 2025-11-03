@@ -17,5 +17,10 @@ internal sealed class FakeCopilotService : ICopilotService
             yield return chunk;
         await System.Threading.Tasks.Task.CompletedTask;
     }
+    
+    public void ClearHistory()
+    {
+        // No-op for fake implementation
+    }
 }
 

@@ -7,8 +7,8 @@
         xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
         xmlns:core="clr-namespace:CodePunk.CopilotDesktop.Core"
         x:Class="CodePunk.CopilotDesktop.UI.MainWindow"
-        Width="900" Height="600"
-        Title="CodePunk Copilot Desktop"
+        Width="900" Height="720"
+        Title="GitHub Copilot"
         mc:Ignorable="d">
   <Window.Resources>
     <conv:EqualsConverter x:Key="EqualsConverter" />
@@ -16,47 +16,218 @@
   <Design.DataContext>
     <ui:MainWindowViewModel />
   </Design.DataContext>
-
+  
+  <!-- Simple single column layout -->
   <DockPanel>
-    <Border DockPanel.Dock="Top" Background="#F3F3F3" Padding="12">
-      <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto">
-        <TextBlock Text="CodePunk Copilot Desktop" FontWeight="Bold" FontSize="16" />
-        <StackPanel Orientation="Horizontal" Grid.Column="1" Spacing="8" VerticalAlignment="Center">
-          <TextBlock Text="💻 Code" VerticalAlignment="Center" />
-          <ToggleSwitch IsChecked="{Binding Chat.IsChatMode}"/>
-          <TextBlock Text="💬 Chat" VerticalAlignment="Center" />
+    <!-- Header with logo and mode toggle -->
+    <Border DockPanel.Dock="Top" 
+            Background="{DynamicResource SurfaceBrush}" 
+            BorderBrush="{DynamicResource BorderBrushLow}" 
+            BorderThickness="0,0,0,1"
+            Padding="20,12">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <!-- Logo -->
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <Image Source="/github-copilot-white-icon.png" Width="32" Height="32" />
+          <TextBlock Text="GitHub Copilot" 
+                     FontSize="16" 
+                     FontWeight="SemiBold" 
+                     Foreground="{DynamicResource TextBrush}"
+                     VerticalAlignment="Center"/>
+        </StackPanel>
+        
+        <!-- Mode toggle and clear button -->
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <ToggleSwitch IsChecked="{Binding Chat.IsChatMode, Mode=TwoWay}"
+                        OnContent="Chat Mode"
+                        OffContent="Code Mode"/>
+          <Button Classes="icon" Content="🗑️" ToolTip.Tip="Clear History" Click="OnClearHistory"/>
         </StackPanel>
       </Grid>
     </Border>
-    <ScrollViewer Name="ChatScroll" VerticalScrollBarVisibility="Auto">
-      <ItemsControl ItemsSource="{Binding Chat.Messages}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="core:ChatMessage">
-            <Grid ColumnDefinitions="*,*" Margin="12,6">
-              <Border Grid.Column="0" Background="#EEE" Padding="10" CornerRadius="10" MaxWidth="600"
-                      IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=Assistant}">
-                <md:MarkdownScrollViewer Markdown="{Binding Content}"/>
-              </Border>
 
-              <Border Grid.Column="1" Background="#0078D4" Padding="10" CornerRadius="10" MaxWidth="600"
-                      IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=User}">
-                <TextBlock TextWrapping="Wrap" Text="{Binding Content}" Foreground="White"/>
-              </Border>
-            </Grid>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
-    <Border DockPanel.Dock="Bottom" Background="#F9F9F9" Padding="12">
+    <!-- Input area at bottom (DockPanel.Dock="Bottom" makes it stick to bottom) -->
+    <Border DockPanel.Dock="Bottom" 
+            Background="{DynamicResource SurfaceBrush}"
+            BorderBrush="{DynamicResource BorderBrushLow}"
+            BorderThickness="0,1,0,0"
+            Padding="20,16">
       <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
-        <TextBox Name="InputBox" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+        <!-- Multi-line input -->
+        <TextBox Name="InputBox" 
+                 Grid.Row="0" 
+                 Grid.Column="0"
                  AcceptsReturn="True"
-                 Watermark="Ask Copilot..."
-                 Text="{Binding Chat.InputText}"/>
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Copilot is typing..." IsVisible="{Binding Chat.IsStreaming}"/>
-        <Button Grid.Row="1" Grid.Column="1" Content="Send" Command="{Binding Chat.SendCommand}"/>
+                 TextWrapping="Wrap"
+                 MinHeight="44"
+                 MaxHeight="200"
+                 Watermark="Ask GitHub Copilot..."
+                 Text="{Binding Chat.InputText, Mode=TwoWay}"
+                 KeyDown="OnInputKeyDown"/>
+        
+        <!-- Send button -->
+        <Button Grid.Row="0" 
+                Grid.Column="1" 
+                Content="Send" 
+                Command="{Binding Chat.SendCommand}"
+                IsEnabled="{Binding !Chat.IsStreaming}"
+                VerticalAlignment="Bottom"
+                Margin="8,0,0,0"
+                Height="44"/>
+        
+        <!-- Status text -->
+        <TextBlock Grid.Row="1" 
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   Classes="muted"
+                   FontSize="12"
+                   Margin="0,8,0,0"
+                   Text="{Binding StatusText}"
+                   IsVisible="{Binding Chat.IsStreaming}"/>
       </Grid>
     </Border>
+
+    <!-- Messages area fills remaining space -->
+    <Grid>
+      <!-- Welcome screen when no messages -->
+      <Grid IsVisible="{Binding Chat.HasMessages, Converter={StaticResource EqualsConverter}, ConverterParameter=False}">
+        <StackPanel Spacing="24" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center"
+                    MaxWidth="600">
+          <!-- Logo -->
+          <Image Source="/github-copilot-white-icon.png" 
+                 Width="80" 
+                 Height="80" 
+                 HorizontalAlignment="Center"
+                 Opacity="0.8"/>
+          
+          <!-- Welcome text -->
+          <TextBlock Text="How can I help you today?" 
+                     FontSize="28" 
+                     FontWeight="SemiBold" 
+                     HorizontalAlignment="Center"
+                     Foreground="{DynamicResource TextBrush}"/>
+          
+          <!-- Suggestions -->
+          <StackPanel Spacing="12">
+            <TextBlock Classes="muted" 
+                       Text="Try asking about:" 
+                       HorizontalAlignment="Center"
+                       FontSize="14"/>
+            <UniformGrid Columns="2" Rows="2">
+              <Border Classes="panel" 
+                      Padding="16" 
+                      Margin="6"
+                      Cursor="Hand">
+                <TextBlock TextWrapping="Wrap" 
+                           Text="How do I implement authentication?"
+                           Foreground="{DynamicResource TextBrush}"/>
+              </Border>
+              <Border Classes="panel" 
+                      Padding="16" 
+                      Margin="6"
+                      Cursor="Hand">
+                <TextBlock TextWrapping="Wrap" 
+                           Text="Explain this code snippet"
+                           Foreground="{DynamicResource TextBrush}"/>
+              </Border>
+              <Border Classes="panel" 
+                      Padding="16" 
+                      Margin="6"
+                      Cursor="Hand">
+                <TextBlock TextWrapping="Wrap" 
+                           Text="Debug this error message"
+                           Foreground="{DynamicResource TextBrush}"/>
+              </Border>
+              <Border Classes="panel" 
+                      Padding="16" 
+                      Margin="6"
+                      Cursor="Hand">
+                <TextBlock TextWrapping="Wrap" 
+                           Text="Best practices for React"
+                           Foreground="{DynamicResource TextBrush}"/>
+              </Border>
+            </UniformGrid>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+
+      <!-- Chat messages -->
+      <ScrollViewer Name="ChatScroll" 
+                    VerticalScrollBarVisibility="Auto"
+                    IsVisible="{Binding Chat.HasMessages}">
+        <ItemsControl ItemsSource="{Binding Chat.Messages}" Margin="0,20,0,20">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Spacing="16" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="core:ChatMessage">
+              <StackPanel Spacing="8">
+                <!-- Message container - centered with max width -->
+                <Grid MaxWidth="800" HorizontalAlignment="Center" Margin="20,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  
+                  <!-- Avatar/Icon -->
+                  <Panel Grid.Column="0" 
+                         Width="32" 
+                         Height="32" 
+                         VerticalAlignment="Top"
+                         Margin="0,0,12,0">
+                    <!-- User avatar -->
+                    <Border IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=User}"
+                            Background="{DynamicResource UserBubbleBrush}"
+                            CornerRadius="16"
+                            Width="32"
+                            Height="32">
+                      <TextBlock Text="👤" 
+                                 FontSize="18" 
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+                    </Border>
+                    <!-- Copilot avatar -->
+                    <Border IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=Assistant}"
+                            CornerRadius="16"
+                            Width="32"
+                            Height="32">
+                      <Image Source="/github-copilot-white-icon.png" Width="32" Height="32"/>
+                    </Border>
+                  </Panel>
+                  
+                  <!-- Message content -->
+                  <StackPanel Grid.Column="1" Spacing="6">
+                    <!-- Role label -->
+                    <TextBlock Text="{Binding Role}" 
+                               FontWeight="SemiBold"
+                               FontSize="13"
+                               Foreground="{DynamicResource TextMutedBrush}"/>
+                    
+                    <!-- Message bubble -->
+                    <Border Classes="assistant-message"
+                            IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=Assistant}">
+                      <SelectableTextBlock TextWrapping="Wrap" 
+                                          Text="{Binding Content}" 
+                                          Foreground="{DynamicResource TextBrush}"/>
+                    </Border>
+                    
+                    <Border Classes="user-message"
+                            IsVisible="{Binding Role, Converter={StaticResource EqualsConverter}, ConverterParameter=User}">
+                      <TextBlock TextWrapping="Wrap" 
+                                 Text="{Binding Content}" 
+                                 Foreground="White"/>
+                    </Border>
+                  </StackPanel>
+                </Grid>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Grid>
   </DockPanel>
 </Window>
-
