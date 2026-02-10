@@ -17,3 +17,5 @@ TestResults/
 .DS_Store
 Thumbs.db
 
+# Local notes/assets (not part of this repo)
+Tech Threads/
